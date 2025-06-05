@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ace Race - Card Racing Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #ff9966, #ff5e62);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+        }
+
+        .game-board {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .race-track {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+        }
+
+        .finish-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, gold, orange, gold);
+            z-index: 2;
+            box-shadow: 0 0 10px gold;
+        }
+
+        .level-row {
+            display: flex;
+            height: 70px;
+            position: relative;
+            align-items: center;
+        }
+
+        .lanes-container {
+            display: flex;
+            width: 75%;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+
+        .lane {
+            width: 22%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .lane-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            z-index: 1;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .ace {
+            width: 50px;
+            height: 70px;
+            background: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 3;
+        }
+
+        .ace.hearts { color: #e74c3c; }
+        .ace.diamonds { color: #e74c3c; }
+        .ace.clubs { color: #2c3e50; }
+        .ace.spades { color: #2c3e50; }
+
+        .face-down-cards {
+            width: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .face-down-card {
+            width: 50px;
+            height: 70px;
+            background: linear-gradient(135deg, #8e2de2, #4a00e0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 4;
+        }
+
+        .card-piles {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .pile {
+            width: 100px;
+            height: 140px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .pile:hover {
+            transform: translateY(-5px);
+        }
+
+        .pile-label {
+            position: absolute;
+            top: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .card {
+            width: 80px;
+            height: 120px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card.hearts, .card.diamonds { color: #e74c3c; }
+        .card.clubs, .card.spades { color: #2c3e50; }
+
+        .card.back {
+            background: linear-gradient(135deg, #8e2de2, #4a00e0);
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px;
+            font-size: 1.1rem;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .instructions h2 {
+            margin-bottom: 10px;
+            color: #ff9966;
+        }
+
+        .instructions ul {
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .winner-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .winner-message.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .winner-content {
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .winner-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #ff9966;
+        }
+
+        .winner-ace {
+            font-size: 5rem;
+            margin: 20px 0;
+        }
+
+        .play-again {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .suit-labels {
+            display: flex;
+            width: 75%;
+            justify-content: space-between;
+            padding: 0 10px;
+            margin-top: 10px;
+        }
+
+        .suit-label {
+            width: 22%;
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            text-transform: capitalize;
+        }
+
+        .face-down-header {
+            text-align: center;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .game-info {
+                font-size: 1rem;
+                padding: 10px 15px;
+            }
+
+            .ace, .face-down-card {
+                width: 45px;
+                height: 65px;
+                font-size: 1.8rem;
+            }
+
+            .pile {
+                width: 90px;
+                height: 130px;
+            }
+
+            .card {
+                width: 70px;
+                height: 110px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .ace, .face-down-card {
+                width: 40px;
+                height: 60px;
+                font-size: 1.6rem;
+            }
+
+            .lanes-container {
+                padding: 0 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-flag-checkered"></i> Ace Race</h1>
+            <p class="subtitle">Race your aces to the finish line!</p>
+        </header>
+
+        <div class="game-info">
+            <div class="cards-remaining">
+                <i class="fas fa-cards"></i> Cards: <span id="cards-count">48</span>
+            </div>
+            <div class="moves">
+                <i class="fas fa-shoe-prints"></i> Moves: <span id="moves-count">0</span>
+            </div>
+        </div>
+
+        <div class="game-board">
+            <div class="race-track">
+                <div class="finish-line"></div>
+
+                <!-- Header for face-down cards -->
+                <div style="display: flex; width: 100%;">
+                    <div style="width: 75%;"></div>
+                    <div class="face-down-header">Obstacles</div>
+                </div>
+
+                <!-- Level 5 (Finish) -->
+                <div class="level-row">
+                    <div class="lanes-container">
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace hearts" id="ace-hearts-5" style="display: none;">♥</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace diamonds" id="ace-diamonds-5" style="display: none;">♦</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace clubs" id="ace-clubs-5" style="display: none;">♣</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace spades" id="ace-spades-5" style="display: none;">♠</div>
+                        </div>
+                    </div>
+                    <div class="face-down-cards">
+                        <div class="face-down-card" id="face-down-5">?</div>
+                    </div>
+                </div>
+
+                <!-- Level 4 -->
+                <div class="level-row">
+                    <div class="lanes-container">
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace hearts" id="ace-hearts-4" style="display: none;">♥</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace diamonds" id="ace-diamonds-4" style="display: none;">♦</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace clubs" id="ace-clubs-4" style="display: none;">♣</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace spades" id="ace-spades-4" style="display: none;">♠</div>
+                        </div>
+                    </div>
+                    <div class="face-down-cards">
+                        <div class="face-down-card" id="face-down-4">?</div>
+                    </div>
+                </div>
+
+                <!-- Level 3 -->
+                <div class="level-row">
+                    <div class="lanes-container">
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace hearts" id="ace-hearts-3" style="display: none;">♥</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace diamonds" id="ace-diamonds-3" style="display: none;">♦</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace clubs" id="ace-clubs-3" style="display: none;">♣</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace spades" id="ace-spades-3" style="display: none;">♠</div>
+                        </div>
+                    </div>
+                    <div class="face-down-cards">
+                        <div class="face-down-card" id="face-down-3">?</div>
+                    </div>
+                </div>
+
+                <!-- Level 2 -->
+                <div class="level-row">
+                    <div class="lanes-container">
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace hearts" id="ace-hearts-2" style="display: none;">♥</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace diamonds" id="ace-diamonds-2" style="display: none;">♦</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace clubs" id="ace-clubs-2" style="display: none;">♣</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace spades" id="ace-spades-2" style="display: none;">♠</div>
+                        </div>
+                    </div>
+                    <div class="face-down-cards">
+                        <div class="face-down-card" id="face-down-2">?</div>
+                    </div>
+                </div>
+
+                <!-- Level 1 -->
+                <div class="level-row">
+                    <div class="lanes-container">
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace hearts" id="ace-hearts-1" style="display: none;">♥</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace diamonds" id="ace-diamonds-1" style="display: none;">♦</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace clubs" id="ace-clubs-1" style="display: none;">♣</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace spades" id="ace-spades-1" style="display: none;">♠</div>
+                        </div>
+                    </div>
+                    <div class="face-down-cards">
+                        <div class="face-down-card" id="face-down-1">?</div>
+                    </div>
+                </div>
+
+                <!-- Start Line -->
+                <div class="level-row">
+                    <div class="lanes-container">
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace hearts" id="ace-hearts-0">♥</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace diamonds" id="ace-diamonds-0">♦</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace clubs" id="ace-clubs-0">♣</div>
+                        </div>
+                        <div class="lane">
+                            <div class="lane-line"></div>
+                            <div class="ace spades" id="ace-spades-0">♠</div>
+                        </div>
+                    </div>
+                    <div class="face-down-cards">
+                        <!-- No face-down card at start line -->
+                    </div>
+                </div>
+
+                <!-- Suit Labels -->
+                <div style="display: flex; width: 100%;">
+                    <div class="suit-labels">
+                        <div class="suit-label">hearts</div>
+                        <div class="suit-label">diamonds</div>
+                        <div class="suit-label">clubs</div>
+                        <div class="suit-label">spades</div>
+                    </div>
+                    <div style="width: 25%;"></div>
+                </div>
+            </div>
+
+            <div class="card-piles">
+                <div class="pile" id="draw-pile-container">
+                    <div class="pile-label">Draw Pile</div>
+                    <div class="card back" id="draw-pile">?</div>
+                </div>
+
+                <div class="pile">
+                    <div class="pile-label">Discard Pile</div>
+                    <div class="card" id="discard-pile"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="reset-btn" id="reset-button">
+                <i class="fas fa-redo"></i> Reset Game
+            </button>
+        </div>
+
+        <div class="instructions">
+            <h2>How to Play</h2>
+            <ul>
+                <li>Click the <strong>Draw Pile</strong> to draw a card</li>
+                <li>The ace matching the suit of the drawn card moves up one level</li>
+                <li>When all aces reach a level, the obstacle card flips</li>
+                <li>The ace matching the flipped card's suit moves down one level</li>
+                <li>The first ace to reach the finish line (top) wins the race!</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="winner-message" id="winner-message">
+        <div class="winner-content">
+            <h2>Race Winner!</h2>
+            <div class="winner-ace" id="winner-ace">♥</div>
+            <p>The <span id="winner-suit">Hearts</span> Ace has won the race!</p>
+            <button class="play-again" id="play-again">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Game state
+            const state = {
+                deck: [],
+                discardPile: [],
+                aces: {
+                    hearts: { position: 0 },
+                    diamonds: { position: 0 },
+                    clubs: { position: 0 },
+                    spades: { position: 0 }
+                },
+                faceDownCards: {
+                    1: { card: null, flipped: false },
+                    2: { card: null, flipped: false },
+                    3: { card: null, flipped: false },
+                    4: { card: null, flipped: false },
+                    5: { card: null, flipped: false }
+                },
+                moves: 0,
+                gameOver: false
+            };
+
+            // DOM elements
+            const drawPileContainer = document.getElementById('draw-pile-container');
+            const resetButton = document.getElementById('reset-button');
+            const cardsCount = document.getElementById('cards-count');
+            const movesCount = document.getElementById('moves-count');
+            const discardPile = document.getElementById('discard-pile');
+            const winnerMessage = document.getElementById('winner-message');
+            const winnerAce = document.getElementById('winner-ace');
+            const winnerSuit = document.getElementById('winner-suit');
+            const playAgainButton = document.getElementById('play-again');
+
+            // Initialize game
+            initGame();
+
+            // Event listeners
+            drawPileContainer.addEventListener('click', drawCard);
+            resetButton.addEventListener('click', initGame);
+            playAgainButton.addEventListener('click', initGame);
+
+            // Initialize game state
+            function initGame() {
+                // Reset game state
+                state.deck = createDeck();
+                state.discardPile = [];
+                state.aces = {
+                    hearts: { position: 0 },
+                    diamonds: { position: 0 },
+                    clubs: { position: 0 },
+                    spades: { position: 0 }
+                };
+                state.moves = 0;
+                state.gameOver = false;
+
+                // Hide winner message
+                winnerMessage.classList.remove('show');
+
+                // Reset face-down cards
+                for (let i = 1; i <= 5; i++) {
+                    state.faceDownCards[i] = {
+                        card: drawRandomCard(),
+                        flipped: false
+                    };
+                    document.getElementById(`face-down-${i}`).textContent = '?';
+                }
+
+                // Update UI
+                updateUI();
+
+                // Position aces at start
+                positionAces();
+            }
+
+            // Create a shuffled deck (without aces)
+            function createDeck() {
+                const suits = ['hearts', 'diamonds', 'clubs', 'spades'];
+                const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+                const deck = [];
+
+                for (const suit of suits) {
+                    for (const rank of ranks) {
+                        deck.push({ suit, rank });
+                    }
+                }
+
+                // Shuffle deck
+                for (let i = deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [deck[i], deck[j]] = [deck[j], deck[i]];
+                }
+
+                return deck;
+            }
+
+            // Draw a random card from the deck
+            function drawRandomCard() {
+                if (state.deck.length === 0) return null;
+
+                const randomIndex = Math.floor(Math.random() * state.deck.length);
+                return state.deck.splice(randomIndex, 1)[0];
+            }
+
+            // Draw a card
+            function drawCard() {
+                if (state.gameOver || state.deck.length === 0) return;
+
+                // Draw card
+                const card = state.deck.pop();
+                state.discardPile.push(card);
+                state.moves++;
+
+                // Visual feedback
+                drawPileContainer.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    drawPileContainer.style.transform = '';
+                }, 200);
+
+                // Move ace up
+                moveAce(card.suit, 1);
+
+                // Check if all aces have reached a level
+                checkLevelCompletion();
+
+                // Check for winner
+                checkWinner();
+
+                // Update UI
+                updateUI();
+            }
+
+            // Move an ace up or down
+            function moveAce(suit, direction) {
+                const ace = state.aces[suit];
+                const newPosition = ace.position + direction;
+
+                // Bound position between 0 and 5
+                if (newPosition >= 0 && newPosition <= 5) {
+                    ace.position = newPosition;
+                }
+
+                // Update ace position visually
+                positionAces();
+            }
+
+            // Position aces on the track
+            function positionAces() {
+                // Hide all aces
+                for (let i = 0; i <= 5; i++) {
+                    for (const suit of ['hearts', 'diamonds', 'clubs', 'spades']) {
+                        document.getElementById(`ace-${suit}-${i}`).style.display = 'none';
+                    }
+                }
+
+                // Show aces at their current positions
+                for (const [suit, ace] of Object.entries(state.aces)) {
+                    const position = ace.position;
+                    document.getElementById(`ace-${suit}-${position}`).style.display = 'flex';
+                }
+            }
+
+            // Check if all aces have reached a level
+            function checkLevelCompletion() {
+                for (let level = 1; level <= 5; level++) {
+                    // Skip if level already completed
+                    if (state.faceDownCards[level].flipped) continue;
+
+                    // Check if all aces have reached this level
+                    const allAcesReached = Object.values(state.aces).every(
+                        ace => ace.position >= level
+                    );
+
+                    if (allAcesReached) {
+                        // Flip the face-down card
+                        state.faceDownCards[level].flipped = true;
+                        document.getElementById(`face-down-${level}`).textContent =
+                            getCardSymbol(state.faceDownCards[level].card);
+
+                        // Move the matching ace down
+                        moveAce(state.faceDownCards[level].card.suit, -1);
+                    }
+                }
+            }
+
+            // Get card symbol for display
+            function getCardSymbol(card) {
+                if (!card) return '?';
+
+                const rankSymbols = {
+                    'J': 'J', 'Q': 'Q', 'K': 'K', '10': '10'
+                };
+
+                const rank = rankSymbols[card.rank] || card.rank;
+                const suitSymbol = getSuitSymbol(card.suit);
+
+                return `${rank}${suitSymbol}`;
+            }
+
+            // Get suit symbol
+            function getSuitSymbol(suit) {
+                const symbols = {
+                    'hearts': '♥',
+                    'diamonds': '♦',
+                    'clubs': '♣',
+                    'spades': '♠'
+                };
+                return symbols[suit];
+            }
+
+            // Check if there's a winner
+            function checkWinner() {
+                for (const [suit, ace] of Object.entries(state.aces)) {
+                    if (ace.position === 5) {
+                        state.gameOver = true;
+                        showWinner(suit);
+                        return;
+                    }
+                }
+
+                // Check if deck is empty
+                if (state.deck.length === 0) {
+                    state.gameOver = true;
+                    // In a real game, you might handle a tie here
+                }
+            }
+
+            // Show winner message
+            function showWinner(suit) {
+                winnerAce.textContent = getSuitSymbol(suit);
+                winnerAce.className = `winner-ace ${suit}`;
+
+                // Set suit name
+                const suitNames = {
+                    'hearts': 'Hearts',
+                    'diamonds': 'Diamonds',
+                    'clubs': 'Clubs',
+                    'spades': 'Spades'
+                };
+                winnerSuit.textContent = suitNames[suit];
+
+                winnerMessage.classList.add('show');
+            }
+
+            // Update UI elements
+            function updateUI() {
+                // Update counts
+                cardsCount.textContent = state.deck.length;
+                movesCount.textContent = state.moves;
+
+                // Update discard pile
+                if (state.discardPile.length > 0) {
+                    const card = state.discardPile[state.discardPile.length - 1];
+                    discardPile.textContent = getCardSymbol(card);
+                    discardPile.className = `card ${card.suit}`;
+                } else {
+                    discardPile.textContent = '';
+                    discardPile.className = 'card';
+                }
+
+                // Disable draw pile if game over
+                drawPileContainer.style.cursor = state.gameOver || state.deck.length === 0 ?
+                    'not-allowed' : 'pointer';
+            }
+        });
+    </script>
+</body>
+</html>
