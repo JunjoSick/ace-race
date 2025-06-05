@@ -37,14 +37,6 @@ Wanna host this on your own GitHub Pages? It’s a breeze:
 
 No dependencies, no fuss—just a single file of pure card-racing magic.
 
-## Screenshots (Because Seeing is Believing) 📸
-
-![Ace Race Start](https://via.placeholder.com/800x400?text=Ace+Race+Start)  
-*The aces line up, ready to bolt. Who’s your money on?*
-
-![Ace Race Finish](https://via.placeholder.com/800x400?text=Ace+Race+Finish)  
-*Victory! One ace claims the crown while the others cry into their card sleeves.*
-
 ## Bugs? Features? Bad Jokes? 🐛💡😂
 
 Found a glitch? Got an idea to make the aces race on rocket-powered unicycles? Or just wanna share a card pun worse than ours? Open an issue or PR! We’re all ears (or all aces, if you will).
