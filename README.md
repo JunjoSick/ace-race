@@ -43,7 +43,7 @@ Found a glitch? Got an idea to make the aces race on rocket-powered unicycles? O
 
 ## Credits (The Real Aces Behind the Game) 👥
 
-- Built with love, caffeine, and a questionable sense of humor by [Your Name or Handle].
+- Built with love, caffeine, and a questionable sense of humor by me and Gemini.
 - Powered by the magic of HTML, CSS, and JavaScript—no frameworks needed.
 - Inspired by the idea of cards having a midlife crisis and deciding to race.
 
